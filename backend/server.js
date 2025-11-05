@@ -8,12 +8,29 @@ dotenv.config();
 const app = express();
 
 // ✅ Middlewares
+const allowedOrigins = [
+  "http://localhost:5173", // Local development
+  "http://localhost:3000", // Optional fallback (if used)
+  "https://aurora-cine.vercel.app", // Production frontend
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:5173"], // your frontend URL
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.warn(`❌ CORS blocked for origin: ${origin}`);
+        return callback(new Error("Not allowed by CORS"), false);
+      }
+    },
     methods: ["GET", "POST"],
+    credentials: true,
   })
 );
+
 app.use(express.json());
 
 // ✅ Initialize Razorpay with test credentials
