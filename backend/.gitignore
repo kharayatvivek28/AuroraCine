@@ -1,0 +1,23 @@
+# Node dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.local
+.env.production
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+*.log
+
+# Build artifacts (if you ever bundle)
+dist/
+*.zip
+*.tar.gz
+
+# OS / Editor files
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db

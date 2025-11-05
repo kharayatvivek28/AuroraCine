@@ -1,0 +1,69 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- Node / Vite ---
+node_modules/
+dist/
+.DS_Store
+
+# --- Environment Variables ---
+.env
+.env.local
+.env.development
+.env.production
+
+# --- Logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+vite-error.log*
+
+# --- Build artifacts ---
+*.zip
+*.tar.gz
+
+# --- Editor / IDE files ---
+.vscode/
+.idea/
+*.swp
+
+# --- Firebase local config ---
+firebase-debug.log
+firebase-debug.*
+.firebaserc.local
+firebase.json.local
+
+# --- Coverage / Testing ---
+coverage/
+*.lcov
+
+# --- MacOS & System Files ---
+Thumbs.db
+Desktop.ini
+
+# --- Backend directory node_modules (safety) ---
+backend/node_modules/
+backend/.env
