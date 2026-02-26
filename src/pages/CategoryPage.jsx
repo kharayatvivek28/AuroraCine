@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import MovieCard from "../components/MovieCard";
 import Pagination from "../components/Pagination";
 import { fetchMoviesByCategory } from "../api/api";
+import { PageTransition, StaggerContainer, StaggerItem, FadeInUp } from "../components/AnimationWrappers";
+import { SkeletonGrid } from "../components/SkeletonCard";
 
 export default function CategoryPage() {
   const { category } = useParams();
@@ -42,17 +44,15 @@ export default function CategoryPage() {
   }, [apiCategory, currentPage]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-4xl font-extrabold mb-8 text-yellow-500 dark:text-yellow-400">
-        {getPageTitle(category)} Movies
-      </h1>
+    <PageTransition className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <FadeInUp>
+        <h1 className="text-4xl font-extrabold mb-8 text-yellow-500 dark:text-yellow-400">
+          {getPageTitle(category)} Movies
+        </h1>
+      </FadeInUp>
 
       {/* Loading State */}
-      {isLoading && (
-        <div className="text-center text-indigo-500 dark:text-purple-400 text-xl py-10">
-          Loading {getPageTitle(category)}...
-        </div>
-      )}
+      {isLoading && <SkeletonGrid count={10} />}
 
       {!isLoading && movies.length === 0 && (
         <div className="text-center text-gray-500 text-xl py-10">
@@ -61,15 +61,18 @@ export default function CategoryPage() {
       )}
 
       {/* Movie Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 mb-12">
-        {movies.map((movie) => (
-          <MovieCard
-            key={movie.id}
-            movie={movie}
-            onClick={() => navigate(`/movie/${movie.id}`)}
-          />
-        ))}
-      </div>
+      {!isLoading && movies.length > 0 && (
+        <StaggerContainer className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 mb-12">
+          {movies.map((movie) => (
+            <StaggerItem key={movie.id}>
+              <MovieCard
+                movie={movie}
+                onClick={() => navigate(`/movie/${movie.id}`)}
+              />
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+      )}
 
       {/* Pagination */}
       <Pagination
@@ -77,6 +80,6 @@ export default function CategoryPage() {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
       />
-    </div>
+    </PageTransition>
   );
 }

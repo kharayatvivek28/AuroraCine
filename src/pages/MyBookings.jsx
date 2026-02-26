@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { db } from "../firebase/config";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { PageTransition, FadeInUp, StaggerContainer, StaggerItem } from "../components/AnimationWrappers";
+import { jsPDF } from "jspdf";
 
 export default function MyBookings() {
   const { currentUser, isLoading } = useAuth();
@@ -79,8 +81,69 @@ export default function MyBookings() {
       </div>
     );
 
+  const handleDownloadPDF = (b) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const bookingId = `AC${b.id?.slice(-8) || Date.now().toString().slice(-8)}`;
+
+    doc.setFillColor(30, 27, 75);
+    doc.rect(0, 0, pageWidth, 297, "F");
+
+    doc.setFillColor(79, 70, 229);
+    doc.rect(0, 0, pageWidth, 45, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(28);
+    doc.setFont("helvetica", "bold");
+    doc.text("AuroraCine", pageWidth / 2, 25, { align: "center" });
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Movie Ticket", pageWidth / 2, 37, { align: "center" });
+
+    doc.setDrawColor(79, 70, 229);
+    doc.setLineDashPattern([3, 3]);
+    doc.line(20, 55, pageWidth - 20, 55);
+    doc.setLineDashPattern([]);
+
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(250, 204, 21);
+    doc.text(b.movieTitle || "Movie", pageWidth / 2, 72, { align: "center" });
+
+    const details = [
+      ["Booking ID", bookingId],
+      ["Date", b.date || "N/A"],
+      ["Showtime", b.showtime || "N/A"],
+      ["Seats", b.seats?.map((s) => `${s.id}`).join(", ") || "N/A"],
+      ["Amount Paid", `Rs. ${(b.totalPaid || 0).toFixed(2)}`],
+    ];
+
+    doc.setFontSize(12);
+    let y = 90;
+    details.forEach(([label, value]) => {
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(156, 163, 175);
+      doc.text(label + ":", 30, y);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.text(String(value), pageWidth - 30, y, { align: "right" });
+      y += 14;
+    });
+
+    doc.setLineDashPattern([3, 3]);
+    doc.line(20, y + 5, pageWidth - 20, y + 5);
+    doc.setLineDashPattern([]);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(107, 114, 128);
+    doc.text("Show this ticket at the theatre entrance.", pageWidth / 2, y + 18, { align: "center" });
+
+    doc.save(`AuroraCine_Ticket_${bookingId}.pdf`);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white py-10">
+    <PageTransition className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white py-10">
       <div className="max-w-5xl mx-auto px-6">
         <h1 className="text-3xl font-bold text-yellow-500 dark:text-yellow-400 text-center mb-8">
           🎬 My Bookings
@@ -112,6 +175,12 @@ export default function MyBookings() {
                   <p className="text-green-500 dark:text-green-400 font-bold mt-2">
                     💰 Paid ₹{(b.totalPaid || 0).toFixed(2)}
                   </p>
+                  <button
+                    onClick={() => handleDownloadPDF(b)}
+                    className="mt-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition shadow-md"
+                  >
+                    📄 Download Ticket PDF
+                  </button>
                 </div>
               ))}
             </div>
@@ -145,6 +214,6 @@ export default function MyBookings() {
           </>
         )}
       </div>
-    </div>
+    </PageTransition>
   );
 }

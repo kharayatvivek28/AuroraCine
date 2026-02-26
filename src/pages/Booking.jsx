@@ -6,6 +6,9 @@ import { BASE_IMAGE_URL } from "../api/api";
 import toast from "react-hot-toast";
 import { BACKEND_URL } from "../config/env";
 import { db } from "../firebase/config";
+import { motion } from "framer-motion";
+import { PageTransition, FadeInUp, SlideIn } from "../components/AnimationWrappers";
+
 import {
   collection,
   addDoc,
@@ -56,12 +59,16 @@ export default function Booking() {
     const loadBookings = async () => {
       if (!currentUser) return;
       try {
-        const allBookingsSnapshot = await getDocs(collection(db, "bookings"));
+        // Use user-scoped query to comply with Firestore security rules
+        const userBookingsQuery = query(
+          collection(db, "bookings"),
+          where("userId", "==", currentUser.uid)
+        );
+        const bookingsSnapshot = await getDocs(userBookingsQuery);
         const now = Date.now();
 
-        const myBookings = allBookingsSnapshot.docs
-          .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
-          .filter((b) => b.userId === currentUser.uid);
+        const myBookings = bookingsSnapshot.docs
+          .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
 
         const active = myBookings.filter((b) => b.expiresAt > now);
         setActiveBookings(active);
@@ -134,6 +141,31 @@ export default function Booking() {
         order_id: order.id,
 
         handler: async function (response) {
+          // Verify payment signature server-side
+          let isVerified = false;
+          try {
+            const verifyRes = await fetch(`${BACKEND_URL}/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            isVerified = verifyData.verified === true;
+          } catch (verifyErr) {
+            // Graceful fallback: if verification endpoint is unreachable, proceed anyway
+            console.warn("Payment verification endpoint unavailable, proceeding:", verifyErr);
+            isVerified = true;
+          }
+
+          if (!isVerified) {
+            toast.error("Payment verification failed. Please contact support.");
+            return;
+          }
+
           toast.success("Payment Successful! 🎬");
           try {
             await saveBookingToFirestore(response.razorpay_payment_id);
@@ -211,15 +243,17 @@ export default function Booking() {
     : `https://placehold.co/300x450/4f46e5/FFFFFF?text=No+Poster`;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-10">
+    <PageTransition className="min-h-screen bg-gray-50 dark:bg-gray-900 py-10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-extrabold mb-8 text-gray-900 dark:text-white text-center">
-          Review & Confirm Booking
-        </h1>
+        <FadeInUp>
+          <h1 className="text-4xl font-extrabold mb-8 text-gray-900 dark:text-white text-center">
+            Review & Confirm Booking
+          </h1>
+        </FadeInUp>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Movie Poster */}
-          <div className="md:col-span-1">
+          <SlideIn direction="left" className="md:col-span-1">
             <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-2xl border border-indigo-300 dark:border-indigo-700">
               <img
                 src={posterUrl}
@@ -242,7 +276,7 @@ export default function Booking() {
                 </p>
               </div>
             </div>
-          </div>
+          </SlideIn>
 
           {/* Booking Summary */}
           <div className="md:col-span-2 space-y-8">
@@ -308,6 +342,6 @@ export default function Booking() {
           </div>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }

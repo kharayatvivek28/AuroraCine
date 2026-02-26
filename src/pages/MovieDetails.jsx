@@ -5,6 +5,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import SeatGrid from "../components/SeatGrid";
 import { fetchMovieDetails, BASE_IMAGE_URL } from "../api/api";
 import { BookingContext } from "../context/BookingContext";
+import { motion } from "framer-motion";
+import { PageTransition, FadeInUp, SlideIn, FadeInView } from "../components/AnimationWrappers";
+
+import { MovieDetailsSkeleton } from "../components/SkeletonCard";
+
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 import {
@@ -241,11 +246,7 @@ export default function MovieDetails() {
   };
 
   if (!movie)
-    return (
-      <div className="text-yellow-500 dark:text-yellow-400 text-center py-20 text-xl">
-        Loading movie details...
-      </div>
-    );
+    return <MovieDetailsSkeleton />;
 
   const poster = movie.poster_path
     ? `${BASE_IMAGE_URL}w500${movie.poster_path}`
@@ -260,9 +261,10 @@ export default function MovieDetails() {
       .join(", ") || "N/A";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white pb-16">
+    <PageTransition className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white pb-16">
       <div className="max-w-6xl mx-auto p-6">
         {/* 🎥 Movie Header */}
+        <FadeInUp>
         <div className="flex flex-col md:flex-row gap-8 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl mb-10">
           <img
             src={poster}
@@ -271,8 +273,18 @@ export default function MovieDetails() {
           />
           <div className="flex-grow">
             <h1 className="text-3xl font-bold">{movie.title}</h1>
-            <p className="text-yellow-500 dark:text-yellow-400 mt-2 text-lg">
-              ⭐ {movie.vote_average?.toFixed(1)} / 10
+            <p className="mt-2 text-lg flex items-center space-x-2">
+              <span
+                className={`inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-bold text-white ${
+                  (movie.vote_average || 0) >= 7
+                    ? "bg-green-500"
+                    : (movie.vote_average || 0) >= 5
+                    ? "bg-yellow-500"
+                    : "bg-red-500"
+                }`}
+              >
+                ⭐ {movie.vote_average?.toFixed(1)} / 10
+              </span>
             </p>
             <p className="mt-2 text-gray-500 dark:text-gray-400">🎬 Directed by {director}</p>
             <p className="text-gray-500 dark:text-gray-400 mb-4">🎭 Cast: {cast}</p>
@@ -290,8 +302,10 @@ export default function MovieDetails() {
             </div>
           </div>
         </div>
+        </FadeInUp>
 
         {/* 🎞️ Date + Showtime */}
+        <FadeInView>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-10 shadow-xl">
           <h2 className="text-2xl font-semibold mb-5 text-yellow-500 dark:text-yellow-400 text-center">
             Select Date & Showtime
@@ -323,8 +337,10 @@ export default function MovieDetails() {
             </div>
           </div>
         </div>
+        </FadeInView>
 
         {/* 🪑 Seats + Summary */}
+        <FadeInView delay={0.2}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-xl border border-indigo-300 dark:border-indigo-700">
             <h2 className="text-2xl font-semibold text-yellow-500 dark:text-yellow-400 mb-5 text-center">
@@ -409,6 +425,7 @@ export default function MovieDetails() {
             </div>
           </div>
         </div>
+        </FadeInView>
       </div>
       {/* 🎬 Trailer Popup */}
       {showTrailer && trailerKey && (
@@ -452,6 +469,6 @@ export default function MovieDetails() {
           </div>
         </div>
       )}
-    </div>
+    </PageTransition>
   );
 }

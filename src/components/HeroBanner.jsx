@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SearchBar from "./SearchBar";
 import { BASE_IMAGE_URL } from "../api/api";
+import { motion, AnimatePresence } from "framer-motion";
 
 const IMAGE_SIZE = "original";
 const FALLBACK_IMAGE =
@@ -8,54 +9,99 @@ const FALLBACK_IMAGE =
 
 export default function HeroBanner({ movies, search, onSearchChange }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const cycleDuration = 15000; // 15 seconds per user request
+  const cycleDuration = 8000;
 
-  // Use the top 5 movies with backdrops for the dynamic background
   const backdropMovies = movies.filter((m) => m.backdrop_path).slice(0, 5);
   const currentMovie = backdropMovies[currentIndex];
 
-  // Auto-cycle logic
   useEffect(() => {
     if (backdropMovies.length > 0) {
       const timer = setInterval(() => {
-        // Cycle to the next index, wrapping around to 0
         setCurrentIndex((prevIndex) => (prevIndex + 1) % backdropMovies.length);
       }, cycleDuration);
 
-      // Cleanup: Clear the interval when the component unmounts or dependencies change
       return () => clearInterval(timer);
     }
-  }, [backdropMovies, cycleDuration]); // Re-run effect when movie list changes
+  }, [backdropMovies.length, cycleDuration]);
 
-  // Construct the background image URL, falling back if necessary
   const backgroundImageUrl = currentMovie?.backdrop_path
     ? `${BASE_IMAGE_URL}${IMAGE_SIZE}${currentMovie.backdrop_path}`
     : FALLBACK_IMAGE;
 
   return (
-    <div
-      className="relative h-[65vh] w-full flex items-center justify-center text-white  transition-opacity duration-1000 ease-in-out"
-      style={{
-        // Use a background gradient overlay to ensure text is readable
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), url(${backgroundImageUrl})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <div className="relative z-10 text-center px-4">
-        <h2 className="text-4xl md:text-6xl font-extrabold mb-10 drop-shadow-2xl tracking-tight">
-          Experience Cinema Like Never Before
-        </h2>
+    <div className="relative h-[70vh] md:h-[75vh] w-full overflow-hidden">
+      {/* Background image with crossfade */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={backgroundImageUrl}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.2, ease: "easeInOut" }}
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${backgroundImageUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+          }}
+        />
+      </AnimatePresence>
 
-        {/* Search Bar is centered over the banner */}
-        <div className="max-w-xl mx-auto">
+      {/* Gradient overlays — lighter on top, stronger at bottom for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/80" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/30" />
+
+      {/* Hero Content */}
+      <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-4xl md:text-6xl font-extrabold mb-6 drop-shadow-2xl tracking-tight text-white text-center"
+        >
+          Experience Cinema Like Never Before
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="text-white/70 text-base md:text-lg mb-8 text-center max-w-2xl"
+        >
+          Browse the latest blockbusters, pick your seats, and book instantly
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+          className="w-full max-w-xl"
+        >
           <SearchBar
             value={search}
             onChange={onSearchChange}
             placeholder="Search thousands of movies..."
             className="search-bar-hero"
           />
-        </div>
+        </motion.div>
+
+        {/* Navigation dots */}
+        {backdropMovies.length > 1 && (
+          <div className="flex items-center gap-2 mt-6">
+            {backdropMovies.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className={`transition-all duration-300 rounded-full ${
+                  i === currentIndex
+                    ? "w-6 h-2 bg-yellow-400"
+                    : "w-2 h-2 bg-white/40 hover:bg-white/60"
+                }`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

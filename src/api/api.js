@@ -73,3 +73,23 @@ export const fetchMovieDetails = async (id) => {
     return null;
   }
 };
+
+// Fetches movies filtered by genre IDs using the discover endpoint
+export const fetchMoviesByGenre = async (genreIds, page = 1) => {
+  const params = getParams(page);
+  if (!params) return { results: [], total_pages: 1 };
+
+  try {
+    const res = await axios.get(`${BASE_URL}/discover/movie`, {
+      params: {
+        ...params,
+        with_genres: genreIds.join(","),
+        sort_by: "popularity.desc",
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching movies by genre:", error);
+    return { results: [], total_pages: 1 };
+  }
+};

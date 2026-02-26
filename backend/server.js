@@ -2,6 +2,7 @@ import express from "express";
 import Razorpay from "razorpay";
 import cors from "cors";
 import dotenv from "dotenv";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -39,13 +40,48 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+// ✅ Simple in-memory rate limiter (no extra dependencies)
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX = 10; // max requests per window
+
+function rateLimit(req, res, next) {
+  const ip = req.ip || req.connection.remoteAddress || "unknown";
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now - record.start > RATE_LIMIT_WINDOW_MS) {
+    rateLimitMap.set(ip, { start: now, count: 1 });
+    return next();
+  }
+
+  record.count++;
+  if (record.count > RATE_LIMIT_MAX) {
+    return res.status(429).json({
+      error: "Too many requests. Please try again later.",
+    });
+  }
+
+  return next();
+}
+
+// Cleanup stale rate limit entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, record] of rateLimitMap) {
+    if (now - record.start > RATE_LIMIT_WINDOW_MS) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, 5 * 60 * 1000);
+
 // ✅ Health check route
 app.get("/", (req, res) => {
   res.send("AuroraCine Razorpay backend is live ✅");
 });
 
-// ✅ Create Razorpay Order
-app.post("/create-order", async (req, res) => {
+// ✅ Create Razorpay Order (rate limited)
+app.post("/create-order", rateLimit, async (req, res) => {
   try {
     const { amount } = req.body;
 
@@ -66,6 +102,34 @@ app.post("/create-order", async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to create Razorpay order", details: err.message });
+  }
+});
+
+// ✅ Verify Razorpay Payment Signature
+app.post("/verify-payment", (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ error: "Missing payment verification fields" });
+    }
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body)
+      .digest("hex");
+
+    if (expectedSignature === razorpay_signature) {
+      console.log("✅ Payment verified:", razorpay_payment_id);
+      res.status(200).json({ verified: true });
+    } else {
+      console.warn("❌ Payment verification failed:", razorpay_payment_id);
+      res.status(400).json({ verified: false, error: "Invalid payment signature" });
+    }
+  } catch (err) {
+    console.error("❌ Verification error:", err);
+    res.status(500).json({ error: "Payment verification failed", details: err.message });
   }
 });
 

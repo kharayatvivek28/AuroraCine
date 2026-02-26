@@ -1,5 +1,8 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { PageTransition, ScaleIn, FadeInUp } from "../components/AnimationWrappers";
+import { jsPDF } from "jspdf";
 
 export default function Success() {
   const navigate = useNavigate();
@@ -27,31 +30,106 @@ export default function Success() {
     );
   }
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Background
+    doc.setFillColor(30, 27, 75);
+    doc.rect(0, 0, pageWidth, 297, "F");
+
+    // Header bar
+    doc.setFillColor(79, 70, 229);
+    doc.rect(0, 0, pageWidth, 45, "F");
+
+    // Title
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(28);
+    doc.setFont("helvetica", "bold");
+    doc.text("AuroraCine", pageWidth / 2, 25, { align: "center" });
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Movie Ticket", pageWidth / 2, 37, { align: "center" });
+
+    // Dashed line
+    doc.setDrawColor(79, 70, 229);
+    doc.setLineDashPattern([3, 3]);
+    doc.line(20, 55, pageWidth - 20, 55);
+    doc.setLineDashPattern([]);
+
+    // Movie title
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(250, 204, 21);
+    doc.text(movieTitle, pageWidth / 2, 72, { align: "center" });
+
+    // Booking details
+    const details = [
+      ["Booking ID", bookingId],
+      ["Customer", name || "N/A"],
+      ["Email", email || "N/A"],
+      ["Seats", seats ? seats.map((s) => s.id || s).join(", ") : "N/A"],
+      ["Amount Paid", `Rs. ${totalPaid.toFixed(2)}`],
+    ];
+
+    doc.setFontSize(12);
+    let y = 90;
+    details.forEach(([label, value]) => {
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(156, 163, 175);
+      doc.text(label + ":", 30, y);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.text(String(value), pageWidth - 30, y, { align: "right" });
+      y += 14;
+    });
+
+    // Footer
+    doc.setLineDashPattern([3, 3]);
+    doc.setDrawColor(79, 70, 229);
+    doc.line(20, y + 5, pageWidth - 20, y + 5);
+    doc.setLineDashPattern([]);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(107, 114, 128);
+    doc.text("Show this ticket at the theatre entrance.", pageWidth / 2, y + 18, { align: "center" });
+    doc.text("Enjoy the movie! :)", pageWidth / 2, y + 28, { align: "center" });
+
+    doc.save(`AuroraCine_Ticket_${bookingId}.pdf`);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
+    <PageTransition className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
       <div className="max-w-2xl w-full bg-white dark:bg-gray-800 p-8 rounded-2xl border border-green-300/50 dark:border-green-500/50 shadow-2xl text-center space-y-8">
-        {/* Success Icon */}
-        <div className="flex justify-center">
-          <div className="bg-green-600 p-4 rounded-full shadow-lg">
-            <svg
-              className="w-16 h-16 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+        {/* Success Icon — scale up celebration */}
+        <ScaleIn>
+          <div className="flex justify-center">
+            <motion.div
+              className="bg-green-600 p-4 rounded-full shadow-lg"
+              animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
+              transition={{ duration: 0.8, delay: 0.5 }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M5 13l4 4L19 7"
-              ></path>
-            </svg>
+              <svg
+                className="w-16 h-16 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                ></path>
+              </svg>
+            </motion.div>
           </div>
-        </div>
+        </ScaleIn>
 
         {/* Confirmation Message */}
-        <div>
+        <FadeInUp delay={0.2}>
           <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-3">
             Booking Confirmed! 🎉
           </h1>
@@ -59,55 +137,74 @@ export default function Success() {
             Your seats for <span className="text-yellow-500 dark:text-yellow-400">{movieTitle}</span>{" "}
             have been successfully reserved.
           </p>
-        </div>
+        </FadeInUp>
 
         {/* Summary Details */}
-        <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-xl space-y-4 text-left border border-gray-200 dark:border-gray-700">
-          <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-gray-700">
-            <span className="text-gray-500 dark:text-gray-400 font-medium">Confirmation ID:</span>
-            <span className="text-gray-900 dark:text-white font-mono font-bold text-lg">
-              {bookingId}
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Customer:</span>
-              <span className="text-gray-900 dark:text-white font-semibold">{name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Seats:</span>
-              <span className="text-gray-900 dark:text-white">
-                {seats ? seats.map(s => s.id || s).join(", ") : "N/A"}
+        <FadeInUp delay={0.4}>
+          <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-xl space-y-4 text-left border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-gray-700">
+              <span className="text-gray-500 dark:text-gray-400 font-medium">Confirmation ID:</span>
+              <span className="text-gray-900 dark:text-white font-mono font-bold text-lg">
+                {bookingId}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Email:</span>
-              <span className="text-gray-900 dark:text-white break-all">{email}</span>
-            </div>
 
-            <div className="flex justify-between pt-3 border-t border-gray-300 dark:border-gray-700">
-              <span className="text-gray-900 dark:text-white text-xl">Total Amount Paid:</span>
-              <span className="text-green-500 text-3xl font-bold">
-                ₹{totalPaid.toFixed(2)}
-              </span>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">Customer:</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">Seats:</span>
+                <span className="text-gray-900 dark:text-white">
+                  {seats ? seats.map(s => s.id || s).join(", ") : "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">Email:</span>
+                <span className="text-gray-900 dark:text-white break-all">{email}</span>
+              </div>
+
+              <div className="flex justify-between pt-3 border-t border-gray-300 dark:border-gray-700">
+                <span className="text-gray-900 dark:text-white text-xl">Total Amount Paid:</span>
+                <motion.span
+                  className="text-green-500 text-3xl font-bold"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
+                >
+                  ₹{totalPaid.toFixed(2)}
+                </motion.span>
+              </div>
             </div>
           </div>
-        </div>
+        </FadeInUp>
 
         {/* Action Button */}
-        <div className="space-y-4">
+        <FadeInUp delay={0.6}>
           <p className="text-gray-500 dark:text-gray-400 text-sm">
             A detailed e-ticket will be sent to your email address shortly.
           </p>
-          <button
-            onClick={() => navigate("/")}
-            className="w-full bg-indigo-700 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-600 transition-all shadow-xl"
-          >
-            Return to Home Page
-          </button>
-        </div>
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleDownloadPDF}
+              className="flex-1 bg-green-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-500 transition-all shadow-xl"
+            >
+              📄 Download Ticket PDF
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/")}
+              className="flex-1 bg-indigo-700 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-600 transition-all shadow-xl"
+            >
+              Return to Home Page
+            </motion.button>
+          </div>
+        </FadeInUp>
       </div>
-    </div>
+    </PageTransition>
   );
 }

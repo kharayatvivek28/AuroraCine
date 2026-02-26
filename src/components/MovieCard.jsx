@@ -1,7 +1,14 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { BASE_IMAGE_URL } from "../api/api";
 import { Ticket } from "lucide-react";
 import toast from "react-hot-toast";
+
+function getRatingColor(rating) {
+  if (rating >= 7) return "bg-green-500";
+  if (rating >= 5) return "bg-yellow-500";
+  return "bg-red-500";
+}
 
 export default function MovieCard({ movie, onClick }) {
   const posterUrl = movie.poster_path
@@ -35,45 +42,49 @@ export default function MovieCard({ movie, onClick }) {
   };
 
   return (
-    <div
-      className="cursor-pointer transform hover:scale-105 transition duration-300 ease-in-out shadow-xl rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-yellow-400 dark:hover:border-yellow-400"
+    <motion.div
+      whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(0,0,0,0.3)" }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="cursor-pointer rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-yellow-400 dark:hover:border-yellow-400 shadow-xl"
       onClick={onClick}
     >
-      {/* Movie poster */}
-      <img
-        src={posterUrl}
-        alt={movie.title}
-        className="w-full h-72 md:h-80 object-cover"
-        onError={(e) => {
-          e.target.onerror = null;
-          e.target.src =
-            "https://placehold.co/300x450/4f46e5/FFFFFF?text=No+Poster";
-        }}
-      />
+      {/* Movie poster with rating overlay */}
+      <div className="relative">
+        <img
+          src={posterUrl}
+          alt={movie.title}
+          className="w-full h-72 md:h-80 object-cover"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src =
+              "https://placehold.co/300x450/4f46e5/FFFFFF?text=No+Poster";
+          }}
+        />
+        {/* Rating badge overlay */}
+        <span
+          className={`absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold text-white shadow-lg backdrop-blur-sm ${getRatingColor(
+            movie.vote_average || 0
+          )}`}
+        >
+          ⭐ {movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"}
+        </span>
+      </div>
 
       {/* Movie info */}
       <div className="p-3 text-gray-900 dark:text-white">
-        <h2 className="text-base font-semibold truncate">{movie.title}</h2>
+        <h2 className="text-sm font-semibold truncate mb-2">{movie.title}</h2>
 
-        {/* ⭐ Rating + Book Now */}
-        <div className="flex items-center justify-between mt-2">
-          <p className="text-yellow-500 dark:text-yellow-400 font-medium text-sm flex items-center space-x-1">
-            <span>⭐</span>
-            <span>
-              {movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"}
-            </span>
-          </p>
-
-          {/* 🎟️ Book Now button */}
-          <button
-            onClick={handleBookNow}
-            className="flex items-center space-x-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs md:text-sm font-semibold px-3 py-1.5 rounded-full transition duration-200 shadow-md"
-          >
-            <Ticket size={14} />
-            <span>Book Now</span>
-          </button>
-        </div>
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={handleBookNow}
+          className="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold py-2 rounded-lg transition duration-200 shadow-md"
+        >
+          <Ticket size={14} />
+          <span>Book Now</span>
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 }

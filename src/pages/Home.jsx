@@ -4,8 +4,11 @@ import MovieCard from "../components/MovieCard";
 import Pagination from "../components/Pagination";
 import HeroBanner from "../components/HeroBanner";
 import Footer from "../components/Footer";
-import { fetchPopularMovies, searchMovies } from "../api/api";
+import { fetchPopularMovies, searchMovies, fetchMoviesByGenre } from "../api/api";
 import { useDebounce } from "../hooks/useDebounce";
+import { PageTransition, StaggerContainer, StaggerItem, FadeInView } from "../components/AnimationWrappers";
+import { SkeletonGrid } from "../components/SkeletonCard";
+import GenreFilter from "../components/GenreFilter";
 
 const DEBOUNCE_DELAY = 500;
 const TMDB_MAX_PAGES = 500;
@@ -16,8 +19,9 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedGenres, setSelectedGenres] = useState([]);
 
   const debouncedSearch = useDebounce(search, DEBOUNCE_DELAY);
 
@@ -37,14 +41,14 @@ export default function Home() {
       const page = debouncedSearch ? pageToFetch : currentPage;
 
       try {
-        const endpointFunction = debouncedSearch
-          ? searchMovies
-          : fetchPopularMovies;
-
-        const resData = await endpointFunction(
-          debouncedSearch || page,
-          page
-        );
+        let resData;
+        if (debouncedSearch) {
+          resData = await searchMovies(debouncedSearch, page);
+        } else if (selectedGenres.length > 0) {
+          resData = await fetchMoviesByGenre(selectedGenres, page);
+        } else {
+          resData = await fetchPopularMovies(page);
+        }
 
         setMovies(resData.results || []);
         setTotalPages(
@@ -68,14 +72,14 @@ export default function Home() {
     };
 
     fetchData();
-  }, [debouncedSearch, currentPage]);
+  }, [debouncedSearch, currentPage, selectedGenres]);
 
   const handleMovieClick = (movieId) => {
     navigate(`/movie/${movieId}`);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <PageTransition className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* 1. Hero Banner */}
       <HeroBanner
         movies={movies}
@@ -83,20 +87,29 @@ export default function Home() {
         onSearchChange={(e) => setSearch(e.target.value)}
       />
 
+      {/* Genre Filter */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <GenreFilter
+          selectedGenres={selectedGenres}
+          onGenreChange={(genres) => {
+            setSelectedGenres(genres);
+            setCurrentPage(1);
+          }}
+        />
+      </div>
+
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
-        <h3 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
-          {debouncedSearch
-            ? `Search Results for "${debouncedSearch}"`
-            : "Popular Movies"}
-        </h3>
+        <FadeInView>
+          <h3 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+            {debouncedSearch
+              ? `Search Results for "${debouncedSearch}"`
+              : "Popular Movies"}
+          </h3>
+        </FadeInView>
 
         {/* Loading and Error States */}
-        {isLoading && (
-          <div className="text-xl text-center text-yellow-500 dark:text-yellow-400">
-            Loading cinema listings...
-          </div>
-        )}
+        {isLoading && <SkeletonGrid count={12} />}
         {error && (
           <div className="text-xl text-center text-red-500">{error}</div>
         )}
@@ -107,17 +120,18 @@ export default function Home() {
           </div>
         )}
 
-        {/* 2. Movie Grid */}
+        {/* 2. Movie Grid with staggered animation */}
         {!isLoading && movies.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <StaggerContainer className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
             {movies.map((movie) => (
-              <MovieCard
-                key={movie.id}
-                movie={movie}
-                onClick={() => handleMovieClick(movie.id)}
-              />
+              <StaggerItem key={movie.id}>
+                <MovieCard
+                  movie={movie}
+                  onClick={() => handleMovieClick(movie.id)}
+                />
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         )}
 
         {/* 3. Pagination */}
@@ -132,6 +146,6 @@ export default function Home() {
 
       {/* 4. Footer */}
       <Footer />
-    </div>
+    </PageTransition>
   );
 }

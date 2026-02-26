@@ -29,91 +29,27 @@ export default function Footer() {
   return (
     <footer className="bg-gray-100 dark:bg-gray-900 border-t border-indigo-200 dark:border-indigo-900 shadow-inner mt-12 pt-10 pb-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-8 border-b border-gray-300/50 dark:border-gray-700/50">
-          {/* Column 1: Logo and Mission */}
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-gray-300/50 dark:border-gray-700/50">
+          {/* Column 1: Logo and Mission — full width on mobile */}
+          <div className="md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
               <div className="bg-yellow-400 p-2 rounded-lg shadow-md">
                 <Film className="w-6 h-6 text-gray-900" />
               </div>
               <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white">AuroraCine</h3>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-xs">
+            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               Your premium destination for the latest cinematic experiences,
               booked with ease.
             </p>
-          </div>
 
-          {/* Column 2: Quick Links */}
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-yellow-400/50 inline-block">
-              Company
-            </h4>
-            <ul className="space-y-2">
-              {links.Company.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.to}
-                    className="text-gray-600 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition text-sm"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Column 3: Browse Categories */}
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-yellow-400/50 inline-block">
-              Browse
-            </h4>
-            <ul className="space-y-2">
-              {links.Browse.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.to}
-                    className="text-gray-600 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition text-sm"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Column 4: Contact Info */}
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-yellow-400/50 inline-block">
-              Get In Touch
-            </h4>
-            <ul className="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
-              <li className="flex items-start space-x-2">
-                <MapPin className="w-4 h-4 mt-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
-                <span>123 Movie St, Cinema City, CA 90210</span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <Mail className="w-4 h-4 mt-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
-                <a
-                  href="mailto:support@auroracine.com"
-                  className="hover:text-yellow-500 dark:hover:text-yellow-400"
-                >
-                  support@auroracine.com
-                </a>
-              </li>
-              <li className="flex items-start space-x-2">
-                <Phone className="w-4 h-4 mt-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
-                <span>+1 (555) 123-4567</span>
-              </li>
-            </ul>
-
-            {/* Social Icons */}
-            <div className="flex space-x-4 mt-6">
+            {/* Social Icons — below mission on all sizes */}
+            <div className="flex space-x-4 mt-5">
               <a
                 href="#"
                 className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                 </svg>
               </a>
@@ -121,7 +57,7 @@ export default function Footer() {
                 href="#"
                 className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-twitter">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-17 14 2.1 1.5 5 2.1 8-.4C5.8 19.3 2.7 20 2 20c2.2-2.3 3.6-5.4 3.6-9.1C3 9.4 3.7 7 4.9 5.8c3 3.7 6.4 5.2 10.3 3.8C16.5 8 18 5.7 18.7 4" />
                 </svg>
               </a>
@@ -129,12 +65,79 @@ export default function Footer() {
                 href="#"
                 className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                   <line x1="17.5" x2="17.5" y1="6.5" y2="6.5" />
                 </svg>
               </a>
+            </div>
+          </div>
+
+          {/* Columns 2-4: Link groups — 3 columns on mobile, inline in desktop */}
+          <div className="grid grid-cols-3 md:col-span-3 gap-6 md:gap-8">
+            {/* Company */}
+            <div>
+              <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-3 border-b border-yellow-400/50 inline-block pb-1">
+                Company
+              </h4>
+              <ul className="space-y-2">
+                {links.Company.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      to={link.to}
+                      className="text-gray-600 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition text-sm"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Browse */}
+            <div>
+              <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-3 border-b border-yellow-400/50 inline-block pb-1">
+                Browse
+              </h4>
+              <ul className="space-y-2">
+                {links.Browse.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      to={link.to}
+                      className="text-gray-600 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition text-sm"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-3 border-b border-yellow-400/50 inline-block pb-1">
+                Contact
+              </h4>
+              <ul className="space-y-2.5 text-gray-600 dark:text-gray-400 text-sm">
+                <li className="flex items-start space-x-2">
+                  <MapPin className="w-4 h-4 mt-0.5 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+                  <span>Cinema City, CA</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <Mail className="w-4 h-4 mt-0.5 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+                  <a
+                    href="mailto:support@auroracine.com"
+                    className="hover:text-yellow-500 dark:hover:text-yellow-400 break-all"
+                  >
+                    support@auroracine.com
+                  </a>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <Phone className="w-4 h-4 mt-0.5 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+                  <span>+1 (555) 123-4567</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
