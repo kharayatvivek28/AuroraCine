@@ -29,21 +29,13 @@ const SHOWTIME_SLOTS = [
   { type: "Night Shows", times: ["9:30 PM", "10:30 PM"] },
 ];
 
-// ✅ Generate seat layout (A1–H8) with test pricing
 const createInitialSeats = () => {
   const rows = "ABCDEFGH".split("");
   const seats = [];
 
-  // A–C ₹1, D–H ₹2
   const rowPrices = {
-    A: 1,
-    B: 1,
-    C: 1,
-    D: 2,
-    E: 2,
-    F: 2,
-    G: 2,
-    H: 2,
+    A: 1, B: 1, C: 1,
+    D: 2, E: 2, F: 2, G: 2, H: 2,
   };
 
   for (const row of rows) {
@@ -82,15 +74,13 @@ export default function MovieDetails() {
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerKey, setTrailerKey] = useState(null);
 
-  // 💰 Dynamic total based on selected seat prices
   const totalPrice = chosenSeats.reduce((sum, seatId) => {
     const seat = seats.find((s) => s.id === seatId);
     return seat ? sum + seat.price : sum;
   }, 0);
 
-  const LOCK_DURATION_MS = 2 * 60 * 1000; // 2 minutes
+  const LOCK_DURATION_MS = 2 * 60 * 1000;
 
-  // ✅ Fetch movie details
   useEffect(() => {
     const loadMovie = async () => {
       const data = await fetchMovieDetails(id);
@@ -100,7 +90,6 @@ export default function MovieDetails() {
     loadMovie();
   }, [id, setSelectedMovie]);
 
-  // 🎥 Fetch trailer video info from TMDB (using Bearer Token v4)
   useEffect(() => {
     const fetchTrailer = async () => {
       try {
@@ -127,7 +116,6 @@ export default function MovieDetails() {
           return;
         }
 
-        // ✅ Best match order: Official Trailer > Any Trailer > Any YouTube Video
         const trailer =
           data.results.find(
             (v) => v.site === "YouTube" && v.type === "Trailer" && v.official
@@ -150,7 +138,6 @@ export default function MovieDetails() {
     fetchTrailer();
   }, [id]);
 
-  // ✅ Real-time Firestore booked seats listener (no double selection)
   useEffect(() => {
     if (!movie || !selectedTime) return;
 
@@ -165,24 +152,18 @@ export default function MovieDetails() {
       const bookedSeats = snapshot.docs.map((doc) => doc.data());
       setSeats((prev) =>
         prev.map((seat) => {
-          // Seat is booked → always locked
           if (bookedSeats.some((b) => b.seatId === seat.id)) {
             return { ...seat, status: "locked" };
           }
-
-          // Keep user's current local selections as-is
           if (seat.status === "selected") return seat;
-
-          // Everything else → available
           return { ...seat, status: "available" };
         })
       );
     });
 
     return () => unsub();
-  }, [movie, selectedTime, localDate]); // ❌ removed chosenSeats here
+  }, [movie, selectedTime, localDate]);
 
-  // ✅ Auto-clean expired booked seats (client-side cleanup)
   useEffect(() => {
     const interval = setInterval(async () => {
       const now = Date.now();
@@ -192,8 +173,6 @@ export default function MovieDetails() {
 
         snapshot.forEach(async (docSnap) => {
           const data = docSnap.data();
-
-          // Remove expired bookings (past showtime)
           if (data.expiresAt && data.expiresAt < now) {
             await deleteDoc(doc(db, "bookedSeats", docSnap.id));
             console.log(`🧹 Cleaned expired seat: ${data.seatId}`);
@@ -202,16 +181,15 @@ export default function MovieDetails() {
       } catch (error) {
         console.error("Error cleaning expired booked seats:", error);
       }
-    }, 10 * 60 * 1000); // runs every 10 minutes
+    }, 10 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // ✅ Seat click logic (production-ready, single toast, no duplicates)
   const handleSeatClick = (seatId) => {
-    if (toastCooldown) return; // skip if still cooling down
+    if (toastCooldown) return;
     toastCooldown = true;
-    setTimeout(() => (toastCooldown = false), 250); // reset after ¼ sec
+    setTimeout(() => (toastCooldown = false), 250);
 
     setChosenSeats((prev) => {
       const isSelected = prev.includes(seatId);
@@ -237,7 +215,6 @@ export default function MovieDetails() {
     );
   };
 
-  // ✅ Proceed to payment
   const handleProceed = () => {
     if (!currentUser) {
       toast.error("Please sign in to book tickets 🎟️");
@@ -252,7 +229,6 @@ export default function MovieDetails() {
       return;
     }
 
-    // Prepare seat objects with prices
     const chosenSeatDetails = seats
       .filter((s) => chosenSeats.includes(s.id))
       .map((s) => ({ id: s.id, price: s.price }));
@@ -266,7 +242,7 @@ export default function MovieDetails() {
 
   if (!movie)
     return (
-      <div className="text-yellow-400 text-center py-20 text-xl">
+      <div className="text-yellow-500 dark:text-yellow-400 text-center py-20 text-xl">
         Loading movie details...
       </div>
     );
@@ -284,10 +260,10 @@ export default function MovieDetails() {
       .join(", ") || "N/A";
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white pb-16">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white pb-16">
       <div className="max-w-6xl mx-auto p-6">
         {/* 🎥 Movie Header */}
-        <div className="flex flex-col md:flex-row gap-8 bg-gray-800 p-6 rounded-xl shadow-2xl mb-10">
+        <div className="flex flex-col md:flex-row gap-8 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl mb-10">
           <img
             src={poster}
             alt={movie.title}
@@ -295,12 +271,12 @@ export default function MovieDetails() {
           />
           <div className="flex-grow">
             <h1 className="text-3xl font-bold">{movie.title}</h1>
-            <p className="text-yellow-400 mt-2 text-lg">
+            <p className="text-yellow-500 dark:text-yellow-400 mt-2 text-lg">
               ⭐ {movie.vote_average?.toFixed(1)} / 10
             </p>
-            <p className="mt-2 text-gray-400">🎬 Directed by {director}</p>
-            <p className="text-gray-400 mb-4">🎭 Cast: {cast}</p>
-            <p className="text-gray-300 leading-relaxed text-sm">
+            <p className="mt-2 text-gray-500 dark:text-gray-400">🎬 Directed by {director}</p>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">🎭 Cast: {cast}</p>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm">
               {movie.overview || "No description available."}
             </p>
             {/* 🎥 Trailer Button */}
@@ -316,15 +292,15 @@ export default function MovieDetails() {
         </div>
 
         {/* 🎞️ Date + Showtime */}
-        <div className="bg-gray-800 rounded-xl p-6 mb-10 shadow-xl">
-          <h2 className="text-2xl font-semibold mb-5 text-yellow-400 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-10 shadow-xl">
+          <h2 className="text-2xl font-semibold mb-5 text-yellow-500 dark:text-yellow-400 text-center">
             Select Date & Showtime
           </h2>
           <div className="flex flex-col sm:flex-row justify-between items-center gap-5">
             <DatePicker
               selected={localDate}
               onChange={(d) => setLocalDate(d)}
-              className="bg-gray-900 text-white p-3 rounded-lg border border-gray-700 cursor-pointer w-48 sm:w-56 text-center"
+              className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white p-3 rounded-lg border border-gray-300 dark:border-gray-700 cursor-pointer w-48 sm:w-56 text-center"
               minDate={new Date()}
               dateFormat="dd MMM yyyy"
             />
@@ -337,7 +313,7 @@ export default function MovieDetails() {
                     className={`px-4 py-2 rounded-lg font-medium transition ${
                       selectedTime === time
                         ? "bg-yellow-400 text-indigo-900 ring-2 ring-yellow-300"
-                        : "bg-indigo-700 hover:bg-indigo-600"
+                        : "bg-indigo-600 dark:bg-indigo-700 hover:bg-indigo-500 dark:hover:bg-indigo-600 text-white"
                     }`}
                   >
                     {time}
@@ -350,21 +326,21 @@ export default function MovieDetails() {
 
         {/* 🪑 Seats + Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-gray-800 p-8 rounded-xl shadow-xl border border-indigo-700">
-            <h2 className="text-2xl font-semibold text-yellow-400 mb-5 text-center">
+          <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-xl border border-indigo-300 dark:border-indigo-700">
+            <h2 className="text-2xl font-semibold text-yellow-500 dark:text-yellow-400 mb-5 text-center">
               Select Your Seats
             </h2>
             <SeatGrid seats={seats} onSeatClick={handleSeatClick} />
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-xl border border-indigo-700 shadow-xl">
-            <h3 className="text-2xl font-semibold text-yellow-400 mb-4">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-indigo-300 dark:border-indigo-700 shadow-xl">
+            <h3 className="text-2xl font-semibold text-yellow-500 dark:text-yellow-400 mb-4">
               Your Booking
             </h3>
             <p>Showtime: {selectedTime || "---"}</p>
             <p>Date: {localDate.toDateString()}</p>
             <p>Seats: {chosenSeats.join(", ") || "---"}</p>
-            <p className="mt-3 font-bold text-lg text-white">
+            <p className="mt-3 font-bold text-lg">
               Total: ₹{totalPrice.toFixed(2)}
             </p>
 
@@ -374,14 +350,14 @@ export default function MovieDetails() {
                 placeholder="Full Name"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                className="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg"
+                className="w-full p-3 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder:text-gray-400"
               />
               <input
                 type="email"
                 placeholder="Email Address"
                 value={userEmail}
                 onChange={(e) => setUserEmail(e.target.value)}
-                className="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg"
+                className="w-full p-3 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder:text-gray-400"
               />
             </div>
 
@@ -391,15 +367,15 @@ export default function MovieDetails() {
             >
               Proceed to Payment
             </button>
-            <div className="mt-6 text-sm text-gray-300 bg-gray-900/40 border border-gray-700 rounded-lg p-4">
-              <h4 className="text-yellow-400 font-semibold text-center mb-3">
+            <div className="mt-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-100/40 dark:bg-gray-900/40 border border-gray-300 dark:border-gray-700 rounded-lg p-4">
+              <h4 className="text-yellow-500 dark:text-yellow-400 font-semibold text-center mb-3">
                 Before You Proceed 🎬
               </h4>
 
-              <ul className="list-disc list-inside space-y-2 text-gray-400">
+              <ul className="list-disc list-inside space-y-2 text-gray-500 dark:text-gray-400">
                 <li>
                   ⏰ Seats are locked for{" "}
-                  <span className="text-yellow-400 font-semibold">
+                  <span className="text-yellow-500 dark:text-yellow-400 font-semibold">
                     2 minutes
                   </span>
                   . Complete payment to confirm your booking!
@@ -410,14 +386,14 @@ export default function MovieDetails() {
                 </li>
                 <li>
                   🔒 Secure payment powered by{" "}
-                  <span className="text-yellow-400 font-semibold">
+                  <span className="text-yellow-500 dark:text-yellow-400 font-semibold">
                     Razorpay
                   </span>
                   .
                 </li>
                 <li>
                   💡 Sign in to view or download your tickets later from{" "}
-                  <span className="text-yellow-400 font-semibold">
+                  <span className="text-yellow-500 dark:text-yellow-400 font-semibold">
                     My Bookings
                   </span>
                   .
@@ -437,17 +413,15 @@ export default function MovieDetails() {
       {/* 🎬 Trailer Popup */}
       {showTrailer && trailerKey && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
-          <div className="bg-gray-900 rounded-xl shadow-2xl w-full max-w-3xl relative">
-            {/* Close button */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-3xl relative">
             <button
               onClick={() => setShowTrailer(false)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-white transition"
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
               aria-label="Close Trailer"
             >
               ✕
             </button>
 
-            {/* YouTube Video */}
             <iframe
               width="100%"
               height="450"
@@ -462,11 +436,11 @@ export default function MovieDetails() {
         </div>
       )}
 
-      {/* 🎬 Fallback: if no trailer available */}
+      {/* 🎬 Fallback: no trailer */}
       {showTrailer && !trailerKey && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
-          <div className="bg-gray-900 text-center rounded-xl shadow-2xl p-8 max-w-md">
-            <h3 className="text-xl text-yellow-400 font-semibold mb-4">
+          <div className="bg-white dark:bg-gray-900 text-center rounded-xl shadow-2xl p-8 max-w-md">
+            <h3 className="text-xl text-yellow-500 dark:text-yellow-400 font-semibold mb-4">
               No Trailer Available 😞
             </h3>
             <button

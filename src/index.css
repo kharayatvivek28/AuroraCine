@@ -1,1 +1,23 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Smooth theme transitions */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Exclude transitions on elements that should be instant */
+input,
+textarea,
+button,
+select,
+a,
+img,
+video,
+iframe {
+  transition-property: background-color, border-color, color, opacity, transform, box-shadow;
+}

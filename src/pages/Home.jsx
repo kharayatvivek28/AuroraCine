@@ -14,29 +14,23 @@ export default function Home() {
   const navigate = useNavigate();
   const [movies, setMovies] = useState([]);
   const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1); // 🌟 Now only used for pagination UI
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Debounce the search term
   const debouncedSearch = useDebounce(search, DEBOUNCE_DELAY);
 
-  // 🌟 FIX: useEffect now depends on debouncedSearch and currentPage
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
 
-      // Reset page to 1 if the search term changes (user started typing/searching)
       const pageToFetch =
         search !== "" && debouncedSearch === search ? 1 : currentPage;
 
-      // If the search term just changed, ensure we are on page 1 before fetching
       if (debouncedSearch && pageToFetch === currentPage && currentPage !== 1) {
-        // This ensures the pagination state aligns with the new search
         setCurrentPage(1);
-        // We return here to let the next render cycle execute the fetch with page 1
         return;
       }
 
@@ -47,13 +41,11 @@ export default function Home() {
           ? searchMovies
           : fetchPopularMovies;
 
-        // Fetch data using the debounced term or fetch popular
         const resData = await endpointFunction(
-          debouncedSearch || page, // searchMovies expects query, fetchPopularMovies expects page, but they all return data
+          debouncedSearch || page,
           page
         );
 
-        // Update state with results and total pages from the API
         setMovies(resData.results || []);
         setTotalPages(
           resData.total_pages > TMDB_MAX_PAGES
@@ -75,28 +67,25 @@ export default function Home() {
       }
     };
 
-    // Execute fetch whenever search or page changes
     fetchData();
-  }, [debouncedSearch, currentPage]); // Re-run effect only when these dependencies change
+  }, [debouncedSearch, currentPage]);
 
-  // Handler for MovieCard click
   const handleMovieClick = (movieId) => {
     navigate(`/movie/${movieId}`);
   };
 
   return (
-    // Add flex-col to enable the footer to push to the bottom
-    <div className="min-h-screen bg-gray-900 flex flex-col">
-      {/* 1. Hero Banner with dynamic background and integrated SearchBar */}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      {/* 1. Hero Banner */}
       <HeroBanner
         movies={movies}
         search={search}
         onSearchChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* Main Content Area - flex-grow ensures it takes up available space */}
+      {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
-        <h3 className="text-3xl font-bold mb-8 text-white">
+        <h3 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
           {debouncedSearch
             ? `Search Results for "${debouncedSearch}"`
             : "Popular Movies"}
@@ -104,7 +93,7 @@ export default function Home() {
 
         {/* Loading and Error States */}
         {isLoading && (
-          <div className="text-xl text-center text-yellow-400">
+          <div className="text-xl text-center text-yellow-500 dark:text-yellow-400">
             Loading cinema listings...
           </div>
         )}
@@ -141,7 +130,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* 4. Professional Footer - Renders below all content */}
+      {/* 4. Footer */}
       <Footer />
     </div>
   );

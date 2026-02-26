@@ -30,7 +30,6 @@ export default function Booking() {
     pricePerSeat,
   } = useContext(BookingContext);
 
-  // user details from previous step
   const { name, email } = location.state || {};
 
   const [activeBookings, setActiveBookings] = useState([]);
@@ -39,7 +38,6 @@ export default function Booking() {
     ? selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0)
     : 0;
 
-  // 🧠 Prevent crash if context is empty or user refreshed
   useEffect(() => {
     if (
       !selectedMovie ||
@@ -54,7 +52,6 @@ export default function Booking() {
     }
   }, [selectedMovie, selectedSeats, selectedShowtime, name, email, navigate]);
 
-  // 🧾 Fetch active bookings
   useEffect(() => {
     const loadBookings = async () => {
       if (!currentUser) return;
@@ -77,7 +74,6 @@ export default function Booking() {
     loadBookings();
   }, [currentUser]);
 
-  // ✅ Save booking in Firestore
   const saveBookingToFirestore = async (paymentId) => {
     try {
       await addDoc(collection(db, "bookings"), {
@@ -93,7 +89,7 @@ export default function Booking() {
         paymentId: paymentId || "N/A",
         createdAt: serverTimestamp(),
         expiresAt:
-          Number(selectedDate?.getTime() || Date.now()) + 6 * 60 * 60 * 1000, // 6 hrs after show
+          Number(selectedDate?.getTime() || Date.now()) + 6 * 60 * 60 * 1000,
       });
       console.log("✅ Booking saved successfully!");
     } catch (error) {
@@ -101,14 +97,12 @@ export default function Booking() {
       toast.error(
         "Failed to save booking — check Firestore rules or permissions."
       );
-      throw error; // <-- make sure this bubbles up to the handler
+      throw error;
     }
   };
 
-  // ✅ Handle Razorpay payment (clean version — no seatLocks)
   const handleConfirm = async () => {
     try {
-      // ✅ Guard: Ensure context and user are valid
       if (!selectedMovie || !selectedSeats?.length) {
         toast.error("Please select a movie and seats first!");
         navigate("/");
@@ -144,7 +138,6 @@ export default function Booking() {
           try {
             await saveBookingToFirestore(response.razorpay_payment_id);
 
-            // ✅ Redirect to success page only after booking save success
             navigate("/success", {
               state: {
                 movieTitle: selectedMovie.title,
@@ -185,16 +178,16 @@ export default function Booking() {
 
   if (authLoading)
     return (
-      <div className="text-xl text-center p-20 text-yellow-400">
+      <div className="text-xl text-center p-20 text-yellow-500 dark:text-yellow-400">
         Loading user session...
       </div>
     );
 
   if (!currentUser)
     return (
-      <div className="max-w-md mx-auto mt-20 p-8 bg-red-900/40 rounded-xl shadow-2xl text-center border border-red-700">
-        <h2 className="text-2xl font-bold text-white mb-4">Access Denied</h2>
-        <p className="text-gray-300 mb-6">
+      <div className="max-w-md mx-auto mt-20 p-8 bg-red-100 dark:bg-red-900/40 rounded-xl shadow-2xl text-center border border-red-300 dark:border-red-700">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Access Denied</h2>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
           You must sign in to complete your booking.
         </p>
         <button
@@ -208,7 +201,7 @@ export default function Booking() {
 
   if (!selectedMovie)
     return (
-      <div className="text-center text-gray-400 py-20">
+      <div className="text-center text-gray-500 dark:text-gray-400 py-20">
         No booking data found. Redirecting...
       </div>
     );
@@ -218,33 +211,31 @@ export default function Booking() {
     : `https://placehold.co/300x450/4f46e5/FFFFFF?text=No+Poster`;
 
   return (
-    <div className="min-h-screen bg-gray-900 py-10">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-extrabold mb-8 text-white text-center">
+        <h1 className="text-4xl font-extrabold mb-8 text-gray-900 dark:text-white text-center">
           Review & Confirm Booking
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Movie Poster */}
-          {/* Movie Poster */}
           <div className="md:col-span-1">
-            <div className="bg-gray-800 rounded-xl overflow-hidden shadow-2xl border border-indigo-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-2xl border border-indigo-300 dark:border-indigo-700">
               <img
                 src={posterUrl}
                 alt={selectedMovie.title}
                 className="w-full h-auto object-cover"
               />
               <div className="p-4">
-                <h3 className="text-xl font-bold text-white truncate">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white truncate">
                   {selectedMovie.title}
                 </h3>
 
-                {/* ⭐ Added Movie Rating */}
-                <p className="text-yellow-400 mt-1 text-sm">
+                <p className="text-yellow-500 dark:text-yellow-400 mt-1 text-sm">
                   ⭐ {selectedMovie.vote_average?.toFixed(1) || "N/A"} / 10
                 </p>
 
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
                   {selectedMovie.release_date
                     ? new Date(selectedMovie.release_date).getFullYear()
                     : "N/A"}
@@ -255,48 +246,48 @@ export default function Booking() {
 
           {/* Booking Summary */}
           <div className="md:col-span-2 space-y-8">
-            {/* 🧑‍💼 Customer & Show Details */}
-            <div className="bg-gray-800 p-6 rounded-xl border border-indigo-700 shadow-xl">
-              <h2 className="text-2xl font-bold mb-4 text-yellow-400">
+            {/* Customer & Show Details */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-indigo-300 dark:border-indigo-700 shadow-xl">
+              <h2 className="text-2xl font-bold mb-4 text-yellow-500 dark:text-yellow-400">
                 Customer & Show Details
               </h2>
 
               <div className="space-y-2 text-lg">
                 <p>
-                  <span className="font-semibold text-white">Name:</span>{" "}
-                  <span className="text-gray-300">{name || "N/A"}</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">Name:</span>{" "}
+                  <span className="text-gray-600 dark:text-gray-300">{name || "N/A"}</span>
                 </p>
                 <p>
-                  <span className="font-semibold text-white">Email:</span>{" "}
-                  <span className="text-gray-300">{email || "N/A"}</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">Email:</span>{" "}
+                  <span className="text-gray-600 dark:text-gray-300">{email || "N/A"}</span>
                 </p>
                 <p>
-                  <span className="font-semibold text-white">Date:</span>{" "}
-                  <span className="text-gray-300">
+                  <span className="font-semibold text-gray-900 dark:text-white">Date:</span>{" "}
+                  <span className="text-gray-600 dark:text-gray-300">
                     {selectedDate ? selectedDate.toDateString() : "N/A"}
                   </span>
                 </p>
                 <p>
-                  <span className="font-semibold text-white">Showtime:</span>{" "}
-                  <span className="text-gray-300">
+                  <span className="font-semibold text-gray-900 dark:text-white">Showtime:</span>{" "}
+                  <span className="text-gray-600 dark:text-gray-300">
                     {selectedShowtime || "N/A"}
                   </span>
                 </p>
               </div>
             </div>
 
-            {/* 🎟️ Order Summary */}
-            <div className="bg-gray-800 p-6 rounded-xl border border-indigo-700 shadow-xl">
-              <h2 className="text-2xl font-bold mb-4 text-yellow-400">
+            {/* Order Summary */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-indigo-300 dark:border-indigo-700 shadow-xl">
+              <h2 className="text-2xl font-bold mb-4 text-yellow-500 dark:text-yellow-400">
                 Order Summary
               </h2>
-              <p className="text-lg text-gray-300">
-                <span className="font-semibold text-white">
+              <p className="text-lg text-gray-600 dark:text-gray-300">
+                <span className="font-semibold text-gray-900 dark:text-white">
                   Seats ({selectedSeats?.length || 0}):
                 </span>{" "}
                 {selectedSeats?.map((s) => s.id).join(", ") || "---"}
               </p>
-              <p className="text-lg font-bold text-yellow-400 mt-3">
+              <p className="text-lg font-bold text-yellow-500 dark:text-yellow-400 mt-3">
                 Total: ₹{totalCost.toFixed(2)}
               </p>
             </div>
@@ -310,7 +301,7 @@ export default function Booking() {
 
             <button
               onClick={() => navigate(`/movie/${selectedMovie.id}`)}
-              className="w-full p-3 rounded-lg font-semibold text-lg bg-gray-700 text-white hover:bg-gray-600 transition"
+              className="w-full p-3 rounded-lg font-semibold text-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
             >
               Go Back & Change Seats
             </button>

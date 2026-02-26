@@ -12,13 +12,11 @@ export default function MyBookings() {
   useEffect(() => {
     if (!currentUser) return;
 
-    // ✅ Firestore query for current user's bookings
     const q = query(
       collection(db, "bookings"),
       where("userId", "==", currentUser.uid)
     );
 
-    // ✅ Real-time listener
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -31,7 +29,6 @@ export default function MyBookings() {
 
         console.log("📦 Real-time My Bookings:", myBookings);
 
-        // Separate active vs expired
         const active = myBookings.filter((b) => {
           const exp =
             typeof b.expiresAt === "number"
@@ -58,51 +55,50 @@ export default function MyBookings() {
       }
     );
 
-    // ✅ Cleanup listener when user logs out or page unmounts
     return () => unsubscribe();
   }, [currentUser]);
 
   if (isLoading || loading)
     return (
-      <div className="text-yellow-400 text-center py-20 text-xl">
+      <div className="text-yellow-500 dark:text-yellow-400 text-center py-20 text-xl">
         Loading your bookings...
       </div>
     );
 
   if (!currentUser)
     return (
-      <div className="text-gray-400 text-center py-20 text-lg">
+      <div className="text-gray-500 dark:text-gray-400 text-center py-20 text-lg">
         Please sign in to view your bookings.
       </div>
     );
 
   if (activeBookings.length === 0 && expiredBookings.length === 0)
     return (
-      <div className="text-gray-400 text-center py-20 text-lg">
+      <div className="text-gray-500 dark:text-gray-400 text-center py-20 text-lg">
         You have no bookings yet.
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white py-10">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white py-10">
       <div className="max-w-5xl mx-auto px-6">
-        <h1 className="text-3xl font-bold text-yellow-400 text-center mb-8">
+        <h1 className="text-3xl font-bold text-yellow-500 dark:text-yellow-400 text-center mb-8">
           🎬 My Bookings
         </h1>
 
         {/* ✅ Active Bookings */}
         {activeBookings.length > 0 && (
           <>
-            <h2 className="text-2xl font-semibold text-green-400 mb-4">
+            <h2 className="text-2xl font-semibold text-green-500 dark:text-green-400 mb-4">
               Active Bookings
             </h2>
             <div className="space-y-6 mb-10">
               {activeBookings.map((b) => (
                 <div
                   key={b.id}
-                  className="bg-gray-800 rounded-xl p-6 shadow-xl border border-green-700"
+                  className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-xl border border-green-300 dark:border-green-700"
                 >
-                  <h2 className="text-xl font-bold text-yellow-400 mb-2">
+                  <h2 className="text-xl font-bold text-yellow-500 dark:text-yellow-400 mb-2">
                     🎬 {b.movieTitle || "Untitled Movie"}
                   </h2>
                   <p>📅 {b.date}</p>
@@ -113,7 +109,7 @@ export default function MyBookings() {
                       ? b.seats.map((s) => `${s.id} (₹${s.price})`).join(", ")
                       : "N/A"}
                   </p>
-                  <p className="text-green-400 font-bold mt-2">
+                  <p className="text-green-500 dark:text-green-400 font-bold mt-2">
                     💰 Paid ₹{(b.totalPaid || 0).toFixed(2)}
                   </p>
                 </div>
@@ -125,22 +121,22 @@ export default function MyBookings() {
         {/* ✅ Expired Bookings */}
         {expiredBookings.length > 0 && (
           <>
-            <h2 className="text-2xl font-semibold text-gray-400 mb-4">
+            <h2 className="text-2xl font-semibold text-gray-500 dark:text-gray-400 mb-4">
               Past / Expired Bookings
             </h2>
             <div className="space-y-6">
               {expiredBookings.map((b) => (
                 <div
                   key={b.id}
-                  className="bg-gray-800 rounded-xl p-6 shadow-xl border border-gray-600"
+                  className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-xl border border-gray-300 dark:border-gray-600"
                 >
-                  <h2 className="text-xl font-bold text-yellow-400 mb-2">
+                  <h2 className="text-xl font-bold text-yellow-500 dark:text-yellow-400 mb-2">
                     🎬 {b.movieTitle || "Untitled Movie"}
                   </h2>
                   <p>📅 {b.date}</p>
                   <p>🕒 Showtime: {b.showtime}</p>
                   <p>🎟️ Seats: {b.seats && b.seats.length > 0 ? b.seats.map((s) => `${s.id} (₹${s.price})`).join(", ") : "N/A"}</p>
-                  <p className="text-gray-400 font-bold mt-2">
+                  <p className="text-gray-500 dark:text-gray-400 font-bold mt-2">
                     💰 Paid ₹{(b.totalPaid || 0).toFixed(2)}
                   </p>
                 </div>

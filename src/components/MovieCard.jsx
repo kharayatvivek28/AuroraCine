@@ -9,7 +9,7 @@ export default function MovieCard({ movie, onClick }) {
     : `https://placehold.co/300x450/4f46e5/FFFFFF?text=No+Poster`;
 
   const handleBookNow = (e) => {
-    e.stopPropagation(); // Prevent card click
+    e.stopPropagation();
     toast.custom(
       (t) => (
         <div
@@ -36,7 +36,7 @@ export default function MovieCard({ movie, onClick }) {
 
   return (
     <div
-      className="cursor-pointer transform hover:scale-105 transition duration-300 ease-in-out shadow-xl rounded-xl overflow-hidden bg-gray-800 border border-gray-700 hover:border-yellow-400"
+      className="cursor-pointer transform hover:scale-105 transition duration-300 ease-in-out shadow-xl rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-yellow-400 dark:hover:border-yellow-400"
       onClick={onClick}
     >
       {/* Movie poster */}
@@ -52,12 +52,12 @@ export default function MovieCard({ movie, onClick }) {
       />
 
       {/* Movie info */}
-      <div className="p-3 text-white">
+      <div className="p-3 text-gray-900 dark:text-white">
         <h2 className="text-base font-semibold truncate">{movie.title}</h2>
 
         {/* ⭐ Rating + Book Now */}
         <div className="flex items-center justify-between mt-2">
-          <p className="text-yellow-400 font-medium text-sm flex items-center space-x-1">
+          <p className="text-yellow-500 dark:text-yellow-400 font-medium text-sm flex items-center space-x-1">
             <span>⭐</span>
             <span>
               {movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"}

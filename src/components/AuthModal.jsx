@@ -20,7 +20,6 @@ export default function AuthModal({ isOpen, onClose }) {
 
   if (!isOpen || currentUser) return null;
 
-  // Handle Email / Password flows
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -46,7 +45,6 @@ export default function AuthModal({ isOpen, onClose }) {
     }
   };
 
-  // Handle Google sign-in
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
@@ -68,23 +66,22 @@ export default function AuthModal({ isOpen, onClose }) {
     }
   };
 
-  // ---------- UI ----------
   return (
     <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
-      <div className="bg-gray-900 text-white rounded-xl shadow-2xl w-full max-w-md p-6 relative">
+      <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-xl shadow-2xl w-full max-w-md p-6 relative">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-white transition"
+          className="absolute top-3 right-3 text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
         >
           <X size={20} />
         </button>
 
-        {/* Back Button (for Register/Forgot modes) */}
+        {/* Back Button */}
         {mode !== "login" && (
           <button
             onClick={() => setMode("login")}
-            className="absolute top-3 left-3 text-gray-400 hover:text-white transition"
+            className="absolute top-3 left-3 text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
             aria-label="Back"
           >
             <ArrowLeft size={20} />
@@ -102,7 +99,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
         {/* Email / Password Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex items-center border border-gray-700 rounded-lg px-3 py-2">
+          <div className="flex items-center border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2">
             <Mail size={18} className="text-gray-400 mr-2" />
             <input
               type="email"
@@ -110,12 +107,12 @@ export default function AuthModal({ isOpen, onClose }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-transparent w-full outline-none text-white placeholder-gray-400"
+              className="bg-transparent w-full outline-none text-gray-900 dark:text-white placeholder-gray-400"
             />
           </div>
 
           {mode !== "forgot" && (
-            <div className="flex items-center border border-gray-700 rounded-lg px-3 py-2">
+            <div className="flex items-center border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2">
               <Lock size={18} className="text-gray-400 mr-2" />
               <input
                 type="password"
@@ -123,7 +120,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-transparent w-full outline-none text-white placeholder-gray-400"
+                className="bg-transparent w-full outline-none text-gray-900 dark:text-white placeholder-gray-400"
               />
             </div>
           )}
@@ -144,21 +141,21 @@ export default function AuthModal({ isOpen, onClose }) {
         </form>
 
         {/* Mode Switch Links */}
-        <div className="text-center mt-4 text-sm text-gray-400 space-y-2">
+        <div className="text-center mt-4 text-sm text-gray-500 dark:text-gray-400 space-y-2">
           {mode === "login" && (
             <>
               <p>
-                Don’t have an account?{" "}
+                Don't have an account?{" "}
                 <button
                   onClick={() => setMode("register")}
-                  className="text-indigo-400 hover:underline"
+                  className="text-indigo-500 dark:text-indigo-400 hover:underline"
                 >
                   Register
                 </button>
               </p>
               <button
                 onClick={() => setMode("forgot")}
-                className="text-indigo-400 hover:underline"
+                className="text-indigo-500 dark:text-indigo-400 hover:underline"
               >
                 Forgot password?
               </button>
@@ -168,16 +165,16 @@ export default function AuthModal({ isOpen, onClose }) {
 
         {/* Divider */}
         <div className="flex items-center my-5">
-          <div className="flex-grow border-t border-gray-700" />
-          <span className="px-3 text-gray-500 text-sm">OR</span>
-          <div className="flex-grow border-t border-gray-700" />
+          <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
+          <span className="px-3 text-gray-400 dark:text-gray-500 text-sm">OR</span>
+          <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
         </div>
 
         {/* Google Sign-In */}
         <button
           onClick={handleGoogleSignIn}
           disabled={isLoading || loading}
-          className="w-full bg-white text-black py-2 rounded-lg font-semibold flex items-center justify-center space-x-2 transition hover:bg-gray-200 disabled:opacity-60"
+          className="w-full bg-gray-100 dark:bg-white text-gray-800 dark:text-black py-2 rounded-lg font-semibold flex items-center justify-center space-x-2 transition hover:bg-gray-200 disabled:opacity-60"
         >
           {loading ? (
             <span className="text-gray-600 animate-pulse">Connecting...</span>

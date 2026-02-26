@@ -5,12 +5,11 @@ export default function Success() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ Match property names from Booking.jsx
   const {
     name,
     email,
     seats,
-    totalPaid, // <-- changed from totalCost
+    totalPaid,
     movieTitle,
   } = location.state || {};
 
@@ -20,7 +19,7 @@ export default function Success() {
     return (
       <div className="text-xl text-center p-20 text-red-500">
         Booking data lost. Please return to the{" "}
-        <a href="/" className="text-indigo-400 hover:underline">
+        <a href="/" className="text-indigo-500 dark:text-indigo-400 hover:underline">
           Home Page
         </a>
         .
@@ -29,8 +28,8 @@ export default function Success() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-      <div className="max-w-2xl w-full bg-gray-800 p-8 rounded-2xl border border-green-500/50 shadow-2xl text-center space-y-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
+      <div className="max-w-2xl w-full bg-white dark:bg-gray-800 p-8 rounded-2xl border border-green-300/50 dark:border-green-500/50 shadow-2xl text-center space-y-8">
         {/* Success Icon */}
         <div className="flex justify-center">
           <div className="bg-green-600 p-4 rounded-full shadow-lg">
@@ -53,42 +52,42 @@ export default function Success() {
 
         {/* Confirmation Message */}
         <div>
-          <h1 className="text-4xl font-extrabold text-white mb-3">
+          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-3">
             Booking Confirmed! 🎉
           </h1>
-          <p className="text-gray-300 text-lg">
-            Your seats for <span className="text-yellow-400">{movieTitle}</span>{" "}
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
+            Your seats for <span className="text-yellow-500 dark:text-yellow-400">{movieTitle}</span>{" "}
             have been successfully reserved.
           </p>
         </div>
 
         {/* Summary Details */}
-        <div className="bg-gray-900 p-6 rounded-xl space-y-4 text-left border border-gray-700">
-          <div className="flex justify-between items-center pb-4 border-b border-gray-700">
-            <span className="text-gray-400 font-medium">Confirmation ID:</span>
-            <span className="text-white font-mono font-bold text-lg">
+        <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-xl space-y-4 text-left border border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-gray-700">
+            <span className="text-gray-500 dark:text-gray-400 font-medium">Confirmation ID:</span>
+            <span className="text-gray-900 dark:text-white font-mono font-bold text-lg">
               {bookingId}
             </span>
           </div>
 
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Customer:</span>
-              <span className="text-white font-semibold">{name}</span>
+              <span className="text-gray-500 dark:text-gray-400">Customer:</span>
+              <span className="text-gray-900 dark:text-white font-semibold">{name}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Seats:</span>
-              <span className="text-white">
+              <span className="text-gray-500 dark:text-gray-400">Seats:</span>
+              <span className="text-gray-900 dark:text-white">
                 {seats ? seats.map(s => s.id || s).join(", ") : "N/A"}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Email:</span>
-              <span className="text-white break-all">{email}</span>
+              <span className="text-gray-500 dark:text-gray-400">Email:</span>
+              <span className="text-gray-900 dark:text-white break-all">{email}</span>
             </div>
 
-            <div className="flex justify-between pt-3 border-t border-gray-700">
-              <span className="text-white text-xl">Total Amount Paid:</span>
+            <div className="flex justify-between pt-3 border-t border-gray-300 dark:border-gray-700">
+              <span className="text-gray-900 dark:text-white text-xl">Total Amount Paid:</span>
               <span className="text-green-500 text-3xl font-bold">
                 ₹{totalPaid.toFixed(2)}
               </span>
@@ -98,7 +97,7 @@ export default function Success() {
 
         {/* Action Button */}
         <div className="space-y-4">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
             A detailed e-ticket will be sent to your email address shortly.
           </p>
           <button
