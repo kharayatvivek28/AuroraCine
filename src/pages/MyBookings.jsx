@@ -139,7 +139,7 @@ export default function MyBookings() {
                   </h2>
                   <p>📅 {b.date}</p>
                   <p>🕒 Showtime: {b.showtime}</p>
-                  <p>🎟️ Seats: {b.seats?.join(", ") || "N/A"}</p>
+                  <p>🎟️ Seats: {b.seats && b.seats.length > 0 ? b.seats.map((s) => `${s.id} (₹${s.price})`).join(", ") : "N/A"}</p>
                   <p className="text-gray-400 font-bold mt-2">
                     💰 Paid ₹{(b.totalPaid || 0).toFixed(2)}
                   </p>

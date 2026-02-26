@@ -79,7 +79,7 @@ export default function Success() {
             <div className="flex justify-between">
               <span className="text-gray-400">Seats:</span>
               <span className="text-white">
-                {seats ? seats.join(", ") : "N/A"}
+                {seats ? seats.map(s => s.id || s).join(", ") : "N/A"}
               </span>
             </div>
             <div className="flex justify-between">
